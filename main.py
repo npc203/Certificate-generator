@@ -21,10 +21,25 @@ def list_use():
     folder=str(int(time.time()))
     path='tmp/'+folder
     os.mkdir(path) 
-    with request.files['file'] as f:
-        for i in f.readlines():
+    data={}
+    f=request.files['file']
+    names = f.read().decode("ascii").replace('\r','').split('\n')
+    zipf = zipfile.ZipFile('tmp/final.zip', 'w', zipfile.ZIP_DEFLATED)
+    for i in names:
+        try:
+            print('###############',i)
             generate(i).save(path+f'/{i}.jpg')
+            zipf.write(os.path.join(path,f'{i}.jpg'),arcname=f'{i}.jpg')
+            data[i]='Completed'
+        except Exception as e:
+            print('Warning:',e.__cause__)
+            data[i]=str(e)
+    zipf.close()
+    return render_template('download.html',data=data)
 
+@app.route('/download')
+def download():
+    return send_file('tmp/final.zip', attachment_filename='Certificates.zip',as_attachment=True)
 
 def serve_img(pil_img):
     img_io = BytesIO()
