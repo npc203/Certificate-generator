@@ -4,6 +4,7 @@
  Just another excuse to learn flask better
 ## TODOs
 - Issue of having non-ascii letters messing up with file names (fix: use hashmaps OwO)
+- Totally didn't do any handling of errors.
 - Some sort of progress bar during list zipping.
 - Some sort of security feature (to prevent fakery OwO) ?
 - Better UI LoL

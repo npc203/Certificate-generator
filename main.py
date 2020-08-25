@@ -37,7 +37,7 @@ def list_use():
     zipf.close()
     return render_template('download.html',data=data)
 
-@app.route('/download')
+@app.route('/download',methods=['POST'])
 def download():
     return send_file('tmp/final.zip', attachment_filename='Certificates.zip',as_attachment=True)
 
