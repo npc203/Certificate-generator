@@ -14,12 +14,17 @@ def index():
 @app.route('/single', methods=['POST'])
 def single():
     name=request.form['name']
-    return generate(name)
+    return serve_img(generate(name))
 
 @app.route('/list_upload', methods=['POST'])
 def list_use():
-    f = request.files['file']
-    return f.readlines()
+    folder=str(int(time.time()))
+    path='tmp/'+folder
+    os.mkdir(path) 
+    with request.files['file'] as f:
+        for i in f.readlines():
+            generate(i).save(path+f'/{i}.jpg')
+
 
 def serve_img(pil_img):
     img_io = BytesIO()
@@ -48,7 +53,7 @@ def generate(message):
 
     #image.save('generated_certificates/'+save)
 
-    return serve_img(image)
+    return image
 
 
 
