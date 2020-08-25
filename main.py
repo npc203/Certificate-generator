@@ -20,6 +20,8 @@ def single():
 def list_use():
     folder=str(int(time.time()))
     path='tmp/'+folder
+    if not os.path.isdir('tmp'):
+        os.mkdir('tmp')
     os.mkdir(path) 
     data={}
     f=request.files['file']
@@ -27,9 +29,10 @@ def list_use():
     zipf = zipfile.ZipFile('tmp/final.zip', 'w', zipfile.ZIP_DEFLATED)
     for i in names:
         try:
-            print('###############',i)
-            generate(i).save(path+f'/{i}.jpg')
-            zipf.write(os.path.join(path,f'{i}.jpg'),arcname=f'{i}.jpg')
+            #print('###############',i)
+            fname=''.join(ch for ch in i if ch.isalnum())
+            generate(i).save(path+f'/{fname}.jpg')
+            zipf.write(os.path.join(path,f'{fname}.jpg'),arcname=f'{fname}.jpg')
             data[i]='Completed'
         except Exception as e:
             print('Warning:',e.__cause__)

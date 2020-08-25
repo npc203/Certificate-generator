@@ -11,7 +11,7 @@
 - Some sort of security feature (to prevent fakery OwO) ?
 
 ## Bugs
-- Issue of having non-ascii letters messing up with file names. (fix: use hashmaps OwO)
+- Issue of having non-ascii letters messing up with file names. \[Solved]
 - Totally didn't do any handling of errors.
 - The Name area can only hold limited characters, so deal with names that are too big.
 
