@@ -6,107 +6,128 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Board?</title>
-    <script src="https://code.createjs.com/1.0.0/createjs.min.js"></script>
-    <script>
-        function init() {
-            var stage = new createjs.Stage("myCanvas");
-            var circle = new createjs.Shape();
-            circle.graphics.beginFill("DeepSkyBlue").drawCircle(0, 0, 50);
-            stage.mouseMoveOutside = true;
-            var dragger = new createjs.Container();
-            dragger.x = dragger.y = 100;
-            dragger.addChild(circle);
-            stage.addChild(dragger);
-
-            dragger.on("pressmove", function (evt) {
-                // currentTarget will be the container that the event listener was added to:
-                evt.currentTarget.x = evt.stageX;
-                evt.currentTarget.y = evt.stageY;
-                stage.update();
-            });
-            stage.update();
-        }
-
-
-        function add_txt(text) {
-            var label = new createjs.Text("text", "bold 14px Arial");
-            var dragger = new createjs.Container();
-            dragger.x = dragger.y = 100;
-            dragger.addChild(circle, label);
-            stage.addChild(dragger);
-
-        }
-    </script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/interact.js/1.0.2/interact.min.js"></script>
 </head>
 
 <style>
-    canvas {
+    .flex-container {
+        width: 100%;
+        min-height: 300px;
+        margin: 0 auto;
+        display: flex;
+    }
+
+    #draw {
         margin: auto;
         display: block;
         width: 800px;
         height: 400px;
         border: 1px solid #d3d3d3;
+        object-fit: cover;
+        position: relative;
+
+    }
+
+    #coord {
+        margin: auto;
+        display: block;
+        width: 200px;
+        height: 400px;
+        border: 1px solid #d3d3d3;
+        object-fit: cover;
+    }
+
+    img {
+        max-width: 800px;
+        height: auto;
+    }
+
+    .txtdrag {
+        position: absolute;
     }
 </style>
 
-<body onload="init();">
+<body>
     <h1>Create new certificate</h1>
     <form method="post" enctype="multipart/form-data">
         <input type="file" accept="image/*" id="upload" name="file1">
         <input type="submit">
+
+        <hr>
+        <div class="flex-container">
+            <div id="coord">
+                <center>Text List<br>
+                    <hr>
+                    <input type="text" id="new" placeholder="Type text here" name="Text">
+                    <br><br>
+                    <input type="button" value="Click here to add text" onclick="add_txt()">
+                    <hr>
+                </center>
+                <div id="box"></div>
+            </div>
+            <div id="draw">
+                <div class="txtdrag">AA</div>
+            </div>
+        </div>
     </form>
-    <hr>
-
-    <canvas id="myCanvas">
-        Your browser does not support the canvas element.
-    </canvas>
-
 </body>
 
 
 <script>
-    var fileUpload = document.getElementById('upload');
-    var canvas = document.getElementById('myCanvas');
-    var ctx = canvas.getContext("2d");
-
-    function drawImageActualSize() {
-        canvas.width = this.naturalWidth;
-        canvas.height = this.naturalHeight;
-        ctx.drawImage(this, 0, 0, this.width, this.height);
+    var count = 0;
+    function add_txt() {
+        var txt = document.getElementById("new").value;
+        $('#box').append('<input hidden="hidden" value="' + txt + "|" + '"name="' + count + '_go" disabled>');
+        $('#draw').append('<div class="txtdrag">' + txt + '</div>');
+        count++;
     }
 
-    function readImage() {
-        if (this.files && this.files[0]) {
-            var FR = new FileReader();
-            FR.onload = function (e) {
-                var img = new Image();
-                img.src = e.target.result;
-                img.onload = drawImageActualSize
-            };
-            FR.readAsDataURL(this.files[0]);
-        }
+    var _URL = window.URL || window.webkitURL;
+    $("#upload").change(function (e) {
+        var image, file;
+        if ((file = this.files[0])) {
+            image = new Image();
+            image.onload = function () {
+                src = this.src;
+                $('#draw').prepend('<img src="' + src + '"></img>');
+                e.preventDefault();
+            }
+        };
+        image.src = _URL.createObjectURL(file);
+    });
+
+    interact('.txtdrag')
+        .draggable({
+            restrict: {
+                restriction: "parent",
+                endOnly: true,
+                elementRect: { top: 0, left: 0, bottom: 1, right: 1 }
+            },
+            autoScroll: true,
+            onmove: dragMoveListener,
+            onend: function (event) {
+                var textEl = (parseFloat(target.getAttribute('data-x')) || 0)
+
+                textEl && (textEl.textContent =
+                    'moved a distance of '
+                    + (Math.sqrt(event.dx * event.dx +
+                        event.dy * event.dy) | 0) + 'px');
+            }
+        });
+
+    function dragMoveListener(event) {
+        var target = event.target,
+            x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx,
+            y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+
+        target.style.webkitTransform =
+            target.style.transform =
+            'translate(' + x + 'px, ' + y + 'px)';
+        target.setAttribute('data-x', x);
+        target.setAttribute('data-y', y);
     }
-    fileUpload.onchange = readImage;
-
-    class newText {
-
-        constructor(height, width) {
-            this.height = height;
-            this.width = width;
-        }
-        /*
-        function myDown(e) {
-        if (e.pageX < x + textLength + canvas.offsetLeft && e.pageX > x - textLength + canvas.offsetLeft && e.pageY < y + 15 + canvas.offsetTop &&
-            e.pageY > y - 15 + canvas.offsetTop) {
-            x = e.pageX - canvas.offsetLeft;
-            y = e.pageY - canvas.offsetTop;
-            dragok = true;
-            canvas.onmousemove = myMove;
-        }
-        */
-    }
-
-
 
 </script>
 

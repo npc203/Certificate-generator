@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, send_file
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
-import os
+import os,sys
 import json
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = "./static/"
@@ -30,9 +30,10 @@ def upload_file():
         if 'file1' not in request.files:
             return 'there is no file1 in form!'
         file1 = request.files['file1']
-        path = os.path.join(app.config['UPLOAD_FOLDER'], file1.filename)
-        file1.save(path)
-        return path
+        if file1:  
+            path = os.path.join(app.config['UPLOAD_FOLDER'], file1.filename)
+            file1.save(path)
+        return f"{request}<br><br>{len(request.form)}<br><br>{request.data})"
     
     return render_template("modal.html")
 
