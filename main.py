@@ -1,80 +1,52 @@
-from flask import Flask, render_template, request,send_file
+from flask import Flask, render_template, request, send_file
 from PIL import Image, ImageDraw, ImageFont
-import zipfile
 from io import BytesIO
-import time
 import os
-
+import json
 app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = "./static/"
 
-@app.route('/')
+
+@app.route("/")
 def index():
-    return render_template('index.html')
+    return render_template("index.html")
 
-@app.route('/single', methods=['POST'])
+
+@app.route("/single", methods=["POST"])
 def single():
-    name=request.form['name']
+    name = request.form["name"]
     return serve_img(generate(name))
 
-@app.route('/list_upload', methods=['POST'])
-def list_use():
-    folder=str(int(time.time()))
-    path='tmp/'+folder
-    if not os.path.isdir('tmp'):
-        os.mkdir('tmp')
-    os.mkdir(path) 
-    data={}
-    f=request.files['file']
-    names = f.read().decode("ascii").replace('\r','').split('\n')
-    zipf = zipfile.ZipFile('tmp/final.zip', 'w', zipfile.ZIP_DEFLATED)
-    for i in names:
-        try:
-            #print('###############',i)
-            fname=''.join(ch for ch in i if ch.isalnum())
-            generate(i).save(path+f'/{fname}.jpg')
-            zipf.write(os.path.join(path,f'{fname}.jpg'),arcname=f'{fname}.jpg')
-            data[i]='Completed'
-        except Exception as e:
-            print('Warning:',e.__cause__)
-            data[i]=str(e)
-    zipf.close()
-    return render_template('download.html',data=data)
-
-@app.route('/download',methods=['POST'])
-def download():
-    return send_file('tmp/final.zip', attachment_filename='Certificates.zip',as_attachment=True)
 
 def serve_img(pil_img):
     img_io = BytesIO()
-    pil_img.save(img_io, 'JPEG', quality=70)
+    pil_img.save(img_io, "JPEG", quality=70)
     img_io.seek(0)
-    return send_file(img_io, mimetype='image/jpeg')  
+    return send_file(img_io, mimetype="image/jpeg")
+
+@app.route('/new', methods=['GET', 'POST'])
+def upload_file():
+    if request.method == 'POST':
+        if 'file1' not in request.files:
+            return 'there is no file1 in form!'
+        file1 = request.files['file1']
+        path = os.path.join(app.config['UPLOAD_FOLDER'], file1.filename)
+        file1.save(path)
+        return path
+    
+    return render_template("modal.html")
 
 def generate(message):
-    image = Image.open('static/certificate.png')
-    
+    image = Image.open("static/certificate.png")
     draw = ImageDraw.Draw(image)
-    
-    font = ImageFont.truetype('static/Ubuntu-Regular.ttf', size=20)
-
-    (x,y) = (500,260)
-
-    color = 'rgb(0,0,0)'
-
-    draw.text((x,y), message, fill=color, font=font)
-
-    (x1,y1) = (550,480)
-
-    #save = message+'.png'
-
-    draw.text((x1,y1), 'xyz', fill=color, font=font)
-
-    #image.save('generated_certificates/'+save)
-
+    font = ImageFont.truetype("static/Ubuntu-Regular.ttf", size=20)
+    color = "rgb(0,0,0)"
+    with open("static/info.json","r") as f:
+        data = json.load(f)
+    for item in data["data"]:
+        draw.text(item['coords'], item["msg"], fill=color, font=font)
     return image
-
 
 
 if __name__ == "__main__":
     app.run(debug=True)
-

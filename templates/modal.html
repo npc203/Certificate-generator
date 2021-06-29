@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Board?</title>
+    <script src="https://code.createjs.com/1.0.0/createjs.min.js"></script>
+    <script>
+        function init() {
+            var stage = new createjs.Stage("myCanvas");
+            var circle = new createjs.Shape();
+            circle.graphics.beginFill("DeepSkyBlue").drawCircle(0, 0, 50);
+            stage.mouseMoveOutside = true;
+            var dragger = new createjs.Container();
+            dragger.x = dragger.y = 100;
+            dragger.addChild(circle);
+            stage.addChild(dragger);
+
+            dragger.on("pressmove", function (evt) {
+                // currentTarget will be the container that the event listener was added to:
+                evt.currentTarget.x = evt.stageX;
+                evt.currentTarget.y = evt.stageY;
+                stage.update();
+            });
+            stage.update();
+        }
+
+
+        function add_txt(text) {
+            var label = new createjs.Text("text", "bold 14px Arial");
+            var dragger = new createjs.Container();
+            dragger.x = dragger.y = 100;
+            dragger.addChild(circle, label);
+            stage.addChild(dragger);
+
+        }
+    </script>
+</head>
+
+<style>
+    canvas {
+        margin: auto;
+        display: block;
+        width: 800px;
+        height: 400px;
+        border: 1px solid #d3d3d3;
+    }
+</style>
+
+<body onload="init();">
+    <h1>Create new certificate</h1>
+    <form method="post" enctype="multipart/form-data">
+        <input type="file" accept="image/*" id="upload" name="file1">
+        <input type="submit">
+    </form>
+    <hr>
+
+    <canvas id="myCanvas">
+        Your browser does not support the canvas element.
+    </canvas>
+
+</body>
+
+
+<script>
+    var fileUpload = document.getElementById('upload');
+    var canvas = document.getElementById('myCanvas');
+    var ctx = canvas.getContext("2d");
+
+    function drawImageActualSize() {
+        canvas.width = this.naturalWidth;
+        canvas.height = this.naturalHeight;
+        ctx.drawImage(this, 0, 0, this.width, this.height);
+    }
+
+    function readImage() {
+        if (this.files && this.files[0]) {
+            var FR = new FileReader();
+            FR.onload = function (e) {
+                var img = new Image();
+                img.src = e.target.result;
+                img.onload = drawImageActualSize
+            };
+            FR.readAsDataURL(this.files[0]);
+        }
+    }
+    fileUpload.onchange = readImage;
+
+    class newText {
+
+        constructor(height, width) {
+            this.height = height;
+            this.width = width;
+        }
+        /*
+        function myDown(e) {
+        if (e.pageX < x + textLength + canvas.offsetLeft && e.pageX > x - textLength + canvas.offsetLeft && e.pageY < y + 15 + canvas.offsetTop &&
+            e.pageY > y - 15 + canvas.offsetTop) {
+            x = e.pageX - canvas.offsetLeft;
+            y = e.pageY - canvas.offsetTop;
+            dragok = true;
+            canvas.onmousemove = myMove;
+        }
+        */
+    }
+
+
+
+</script>
+
+</html>
