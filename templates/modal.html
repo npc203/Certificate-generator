@@ -46,6 +46,7 @@
 
     .txtdrag {
         position: absolute;
+        z-index: 10;
     }
 </style>
 
@@ -79,8 +80,10 @@
     var count = 0;
     function add_txt() {
         var txt = document.getElementById("new").value;
-        $('#box').append('<input hidden="hidden" value="' + txt + "|" + '"name="' + count + '_go" disabled>');
-        $('#draw').append('<div class="txtdrag">' + txt + '</div>');
+        var box = $('#box');
+        box.append('<input hidden="hidden" value="' + txt + "|" + 0 + "|" + 0 + '"name="' + count + '_go">');
+        box.append('<p>' + txt + '</p>');
+        $('#draw').prepend('<div class="txtdrag">' + txt + '</div>');
         count++;
     }
 
@@ -91,7 +94,7 @@
             image = new Image();
             image.onload = function () {
                 src = this.src;
-                $('#draw').prepend('<img src="' + src + '"></img>');
+                $('#draw').append('<img src="' + src + '"></img>');
                 e.preventDefault();
             }
         };
@@ -108,12 +111,12 @@
             autoScroll: true,
             onmove: dragMoveListener,
             onend: function (event) {
-                var textEl = (parseFloat(target.getAttribute('data-x')) || 0)
-
-                textEl && (textEl.textContent =
-                    'moved a distance of '
-                    + (Math.sqrt(event.dx * event.dx +
-                        event.dy * event.dy) | 0) + 'px');
+                var target = event.target,
+                    x = target.getAttribute('data-x'),
+                    y = target.getAttribute('data-y');
+                console.log("input[name=" + (count - 1) + "_go]");
+                var O = $("input[name=" + (count - 1) + "_go]");
+                O.val(O.val().split("|")[0] + "|" + x + "|" + y)
             }
         });
 

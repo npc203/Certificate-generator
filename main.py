@@ -33,7 +33,15 @@ def upload_file():
         if file1:  
             path = os.path.join(app.config['UPLOAD_FOLDER'], file1.filename)
             file1.save(path)
-        return f"{request}<br><br>{len(request.form)}<br><br>{request.data})"
+        data = {"data":[]}
+        with open( os.path.join(app.config['UPLOAD_FOLDER'], "info.json"),"w+") as f:
+            for i,j in request.form.items():
+                if i.endswith("_go"):
+                    tmp = j.split("|")
+                    data["data"].append({"msg":tmp[0],"x":tmp[1],"y":tmp[2]})
+            f.write(json.dumps(data,indent=4))
+
+        return f"{request}<br><br>{request.form}<br><br>{request.data})"
     
     return render_template("modal.html")
 
@@ -44,8 +52,10 @@ def generate(message):
     color = "rgb(0,0,0)"
     with open("static/info.json","r") as f:
         data = json.load(f)
+    item = data["data"].pop(0)
+    draw.text((int(item['x']),int(item['y'])), message, fill=color, font=font)
     for item in data["data"]:
-        draw.text(item['coords'], item["msg"], fill=color, font=font)
+        draw.text((int(item['x']),int(item['y'])), item["msg"], fill=color, font=font)
     return image
 
 
